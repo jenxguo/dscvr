@@ -4,8 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import TopSongs from './TopSongs/TopSongs'
 import TopArtists from './TopArtists/TopArtists'
-import FavoritePlaylist from './FavoritePlaylist/FavoritePlaylist'
 
+import * as $ from "jquery";
 import SpotifyWebApi from 'spotify-web-api-js';
 const spotifyApi = new SpotifyWebApi();
 
@@ -19,13 +19,17 @@ class App extends Component {
       spotifyApi.setAccessToken(token);
     }
     this.state = {
+      token: token,
       loggedIn: token ? true : false,
       //eventually make this a data structure with multiple songs, also holds ranking, title, image
+      createdFav: false,
       topSongs: {},
       topArtists: {},
       topGenres: {},
       userid: "",
-      dataLoaded: false
+      dataLoaded: false,
+      favurl: "",
+      favplayid: ""
     }
   }
 
@@ -64,11 +68,49 @@ class App extends Component {
             topSongs: tracks.items,
             topArtists: artists.items,
             userid: userinfo.id,
-            dataLoaded: true
+            dataLoaded: true,
           });
         })
       })
     })
+  }
+
+  populatePlaylist() {
+    var songURIs = [this.state.topSongs.length]
+    for (var i = 0; i < this.state.topSongs.length; i++) {
+      songURIs[i] = this.state.topSongs[i].uri
+    };
+    $.ajax({
+      url: "https://api.spotify.com/v1/playlists/"+this.state.favplayid+"/tracks",
+      type: "POST",
+      data: JSON.stringify({"uris": songURIs}),
+      beforeSend: xhr => {
+        xhr.setRequestHeader("Authorization", "Bearer " + this.state.token);
+      }
+    });
+  }
+
+  createPlaylist() {
+    var today = new Date();
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"];
+    var date = monthNames[today.getMonth()] + " " + today.getFullYear();
+    $.ajax({
+      url: "https://api.spotify.com/v1/users/"+this.state.userid+"/playlists",
+      type: "POST",
+      data: JSON.stringify({name: "Your " + date + " Favorites"}, {description: "Created with DSCVR."}),
+      beforeSend: xhr => {
+        xhr.setRequestHeader("Authorization", "Bearer " + this.state.token);
+      },
+      success: play => {
+        this.setState({
+          favurl: play.external_urls.spotify,
+          favplayid: play.id,
+          createdFav: true
+        });
+        this.populatePlaylist();
+      }
+    });
   }
 
   render(){
@@ -92,6 +134,19 @@ class App extends Component {
       margin: "50em 0 0 0",
     };
 
+    let favbutton =
+      (<div className= "favoritePlaylist">
+          <button onClick={() => this.createPlaylist()} type="button" class="btn btn-dark"> Make a playlist of your favorites!</button>
+      </div>);
+
+    if (this.state.createdFav) {
+      favbutton = (
+        <div className= "favoritePlaylistLink">
+          <a target="_blank" style={loginStyle} href={this.state.favurl}> Check it out here! </a>
+        </div>
+      )
+    }
+
     return (
       <div className="App">
         {!this.state.loggedIn && (
@@ -106,7 +161,7 @@ class App extends Component {
         {this.state.loggedIn && this.state.dataLoaded && (
           <div>
             <TopSongs songs={this.state.topSongs.slice(0, 30)}/>
-            <FavoritePlaylist userid= {this.state.userid} songs={this.state.topSongs}/>
+            {favbutton}
             <TopArtists artists={this.state.topArtists.slice(0, 30)}/>
           </div>
         )}
