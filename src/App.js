@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 import TopSongs from './TopSongs/TopSongs'
 import TopArtists from './TopArtists/TopArtists'
@@ -65,18 +66,41 @@ class App extends Component {
   }
 
   render(){
+    const buttonStyle= {
+      fontsize: "20px",
+      display: "inline-block",
+      padding: "0.35em 1.2em",
+      border: "0.2em solid gray",
+      textalign: "center",
+      margin: "20em 0 0 0",
+      borderradius: "0.12em",
+      boxsizing: "border-box",
+      textdecoration: "none",
+      fontfamily:'Roboto, sans-serif',
+      fontweight:'300',
+      textalign: 'center',
+      cursor: "pointer"
+    };
+
+    const loginStyle= {
+      margin: "50em 0 0 0",
+    };
+
     return (
       <div className="App">
         {!this.state.loggedIn && (
-          <a href='http://localhost:8888'> Login to Spotify </a>
+          <div>
+            <h1>DSCVR</h1>
+            <a style={loginStyle} href='http://localhost:8888'> Login to Spotify </a>
+          </div>
         )}
         {this.state.loggedIn && !this.state.dataLoaded && (
-          <button onClick={() => this.getData()}>Get Ready to DSCVR</button>
+          <button style={buttonStyle} onClick={() => this.getData()}>Get Ready to DSCVR</button>
         )}
         {this.state.loggedIn && this.state.dataLoaded && (
           <div>
-            <TopSongs songs={this.state.topSongs}/>
-            <TopArtists artists={this.state.topArtists}/>
+            <TopSongs songs={this.state.topSongs.slice(0, 30)}/>
+            <TopArtists artists={this.state.topArtists.slice(0, 30)}/>
           </div>
         )}
       </div>

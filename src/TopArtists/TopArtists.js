@@ -3,8 +3,15 @@ import "./TopArtists.css";
 
 const topArtists = (props) => {
   return(
-    <div className="topArtists">
-      <p>Your top artist is {props.artists[0].name}.</p>
+    <div className="topArtists card" style={{width: "45em"}}>
+      <div className="card-body">
+        <h2>Your favorite artists of the past month</h2>
+        <ol>
+          {props.artists.map((item) => (
+            <li>{item.name}</li>
+          ))}
+        </ol>
+      </div>
     </div>
   )
 }
