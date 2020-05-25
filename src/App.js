@@ -4,12 +4,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import TopSongs from './TopSongs/TopSongs'
 import TopArtists from './TopArtists/TopArtists'
+import TopGenres from './TopGenres/TopGenres'
 
 import * as $ from "jquery";
 import SpotifyWebApi from 'spotify-web-api-js';
 const spotifyApi = new SpotifyWebApi();
 
-//Primary App
 class App extends Component {
   constructor(){
     super();
@@ -25,9 +25,10 @@ class App extends Component {
       createdFav: false,
       topSongs: {},
       topArtists: {},
-      topGenres: {},
       userid: "",
       dataLoaded: false,
+      topGenres: {},
+      dataAnalyzed: false,
       favurl: "",
       favplayid: ""
     }
@@ -46,21 +47,11 @@ class App extends Component {
      return hashParams;
   }
 
-  //TODO
-  // getTopGenres(){
-  //   spotifyApi.getMyTopTracks({limit: 50, time_range: "short_term"})
-  //   .then((response) => {
-  //     this.setState({
-  //       topGenres: response.items
-  //     });
-  //   })
-  // }
-
   //API call to get user top tracks/artists/userID
   getData(){
     spotifyApi.getMyTopTracks({limit: 50, time_range: "short_term"})
     .then((tracks) => {
-      spotifyApi.getMyTopArtists({limit: 30, time_range: "short_term"})
+      spotifyApi.getMyTopArtists({limit: 50, time_range: "short_term"})
       .then ((artists) => {
         spotifyApi.getMe()
         .then((userinfo) => {
@@ -75,7 +66,39 @@ class App extends Component {
     })
   }
 
-  populatePlaylist() {
+  //helper method
+  addToGenreDict(genre, genreDict) {
+    for (var i = 0; i < genre.length; i++) {
+      var g = genre[i]
+      if (genreDict[g]) {
+        genreDict[g] += 1;
+      } else {
+        genreDict[g] = 1;
+      }
+    }
+    return genreDict;
+  }
+
+  //extract genres from top artists and count frequencies, stored as dictionary object
+  getTopGenres(){
+    var genreDict = {};
+    var artists = this.state.topArtists;
+    for (var i = 0; i < artists.length; i++) {
+      genreDict = this.addToGenreDict(artists[i].genres, genreDict);
+    }
+    return genreDict;
+  }
+
+  //secondary data analysis function after filling state with initial data
+  analyzeData(){
+    this.setState({
+      topGenres: this.getTopGenres(),
+      dataAnalyzed: true
+    })
+  }
+
+  //Adds songs to Favorites Playlist
+  populateFavPlaylist() {
     var songURIs = [this.state.topSongs.length]
     for (var i = 0; i < this.state.topSongs.length; i++) {
       songURIs[i] = this.state.topSongs[i].uri
@@ -90,7 +113,8 @@ class App extends Component {
     });
   }
 
-  createPlaylist() {
+  //Creates an empty Favorites Playlist
+  createFavPlaylist() {
     var today = new Date();
     const monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"];
@@ -114,6 +138,7 @@ class App extends Component {
   }
 
   render(){
+    //Styles
     const buttonStyle= {
       fontsize: "20px",
       display: "inline-block",
@@ -130,29 +155,36 @@ class App extends Component {
       cursor: "pointer"
     };
 
-    const loginStyle= {
+    const linkStyle= {
       margin: "50em 0 0 0",
     };
 
+    //Data Analysis Logic
+    if (this.state.dataLoaded && !this.state.dataAnalyzed) {
+      this.analyzeData();
+    }
+
+    //Fav Playlist Logic
     let favbutton =
       (<div className= "favoritePlaylist">
-          <button onClick={() => this.createPlaylist()} type="button" class="btn btn-dark"> Make a playlist of your favorites!</button>
+          <button onClick={() => this.createFavPlaylist()} type="button" className="btn btn-dark"> Make a playlist of your favorites!</button>
       </div>);
 
     if (this.state.createdFav) {
       favbutton = (
         <div className= "favoritePlaylistLink">
-          <a target="_blank" style={loginStyle} href={this.state.favurl}> Check it out here! </a>
+          <a target="_blank" style={linkStyle} href={this.state.favurl}> Check it out here! </a>
         </div>
       )
     }
 
+    //Main App
     return (
       <div className="App">
         {!this.state.loggedIn && (
           <div>
             <h1>DSCVR</h1>
-            <a style={loginStyle} href='http://localhost:8888'> Login to Spotify </a>
+            <a style={linkStyle} href='http://localhost:8888'> Login to Spotify </a>
           </div>
         )}
         {this.state.loggedIn && !this.state.dataLoaded && (
@@ -163,6 +195,7 @@ class App extends Component {
             <TopSongs songs={this.state.topSongs.slice(0, 30)}/>
             {favbutton}
             <TopArtists artists={this.state.topArtists.slice(0, 30)}/>
+            <TopGenres genres={this.state.topGenres}/>
           </div>
         )}
       </div>
