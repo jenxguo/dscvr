@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import TopSongs from './TopSongs/TopSongs'
 import TopArtists from './TopArtists/TopArtists'
+import FavoritePlaylist from './FavoritePlaylist/FavoritePlaylist'
 
 import SpotifyWebApi from 'spotify-web-api-js';
 const spotifyApi = new SpotifyWebApi();
@@ -23,6 +24,7 @@ class App extends Component {
       topSongs: {},
       topArtists: {},
       topGenres: {},
+      userid: "",
       dataLoaded: false
     }
   }
@@ -50,17 +52,21 @@ class App extends Component {
   //   })
   // }
 
-  //API call to get user top tracks and top artists
+  //API call to get user top tracks/artists/userID
   getData(){
     spotifyApi.getMyTopTracks({limit: 50, time_range: "short_term"})
     .then((tracks) => {
       spotifyApi.getMyTopArtists({limit: 30, time_range: "short_term"})
       .then ((artists) => {
-        this.setState({
-          topSongs: tracks.items,
-          topArtists: artists.items,
-          dataLoaded: true
-        });
+        spotifyApi.getMe()
+        .then((userinfo) => {
+          this.setState({
+            topSongs: tracks.items,
+            topArtists: artists.items,
+            userid: userinfo.id,
+            dataLoaded: true
+          });
+        })
       })
     })
   }
@@ -100,6 +106,7 @@ class App extends Component {
         {this.state.loggedIn && this.state.dataLoaded && (
           <div>
             <TopSongs songs={this.state.topSongs.slice(0, 30)}/>
+            <FavoritePlaylist userid= {this.state.userid} songs={this.state.topSongs}/>
             <TopArtists artists={this.state.topArtists.slice(0, 30)}/>
           </div>
         )}
