@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import TopSongs from './TopSongs/TopSongs'
 import TopArtists from './TopArtists/TopArtists'
 import TopGenres from './TopGenres/TopGenres'
+import TopFeatures from './TopFeatures/TopFeatures'
 
 import * as $ from "jquery";
 import SpotifyWebApi from 'spotify-web-api-js';
@@ -21,16 +22,28 @@ class App extends Component {
     this.state = {
       token: token,
       loggedIn: token ? true : false,
-      //eventually make this a data structure with multiple songs, also holds ranking, title, image
       createdFav: false,
       topSongs: {},
       topArtists: {},
       userid: "",
       dataLoaded: false,
       topGenres: {},
+      topFeatures: {
+        acousticness: null,
+        danceability: null,
+        energy: null,
+        instrumentalness: null,
+        speechiness: null,
+        valence: null,
+        tempo: null
+      },
       dataAnalyzed: false,
       favurl: "",
-      favplayid: ""
+      favplayid: "",
+      recURIs: [],
+      dscvrurl: "",
+      dscvrid: "",
+      createdRec: false
     }
   }
 
@@ -89,16 +102,64 @@ class App extends Component {
     return genreDict;
   }
 
+  //average helper function
+  average(nums) {
+      return nums.reduce((a, b) => (a + b)) / nums.length;
+  }
+
+  //gets features of top tracks
+  getTrackFeatures(){
+    //grabbing song IDs
+    var songIDs = [this.state.topSongs.length]
+    for (var i = 0; i < this.state.topSongs.length; i++) {
+      songIDs[i] = this.state.topSongs[i].id
+    };
+    spotifyApi.getAudioFeaturesForTracks(songIDs)
+    .then((data) => {
+        var features = data.audio_features;
+        var featLen = features.length;
+        var acousticness = [featLen];
+        var danceability = [];
+        var energy = [];
+        var instrumentalness = [];
+        var speechiness = [];
+        var tempo = [];
+        var valence = [];
+        for (var i = 0; i < featLen; i++) {
+          acousticness[i] = features[i].acousticness;
+          danceability[i] = features[i].danceability;
+          energy[i] = features[i].energy;
+          instrumentalness[i] = features[i].instrumentalness;
+          speechiness[i] = features[i].speechiness;
+          tempo[i] = features[i].tempo;
+          valence[i] = features[i].valence;
+        }
+        this.setState({
+          topFeatures: {
+            acousticness: Math.round(this.average(acousticness)*100)/100,
+            danceability: Math.round(this.average(danceability)*100)/100,
+            energy: Math.round(this.average(energy)*100)/100,
+            instrumentalness: Math.round(this.average(instrumentalness)*1000)/1000,
+            speechiness: Math.round(this.average(speechiness)*100)/100,
+            valence: Math.round(this.average(valence)*100)/100,
+            tempo: Math.round(this.average(tempo))
+          }
+        });
+      });
+  }
+
   //secondary data analysis function after filling state with initial data
   analyzeData(){
+    this.getTrackFeatures();
     this.setState({
       topGenres: this.getTopGenres(),
       dataAnalyzed: true
-    })
+    });
   }
 
   //Adds songs to Favorites Playlist
   populateFavPlaylist() {
+    //getting URIs for the songs
     var songURIs = [this.state.topSongs.length]
     for (var i = 0; i < this.state.topSongs.length; i++) {
       songURIs[i] = this.state.topSongs[i].uri
@@ -132,7 +193,112 @@ class App extends Component {
           favplayid: play.id,
           createdFav: true
         });
-        this.populatePlaylist();
+        this.populateFavPlaylist();
+      }
+    });
+  }
+
+  //Gets recommended songs
+  getRecs() {
+    //Use top 5 artists as seeds
+    var len = 5;
+    var artistSeeds = [len];
+    for (var i = 0; i < len; i++) {
+      artistSeeds[i] = this.state.topArtists[i].id
+    }
+
+    var playlen = 30;
+    var songURIs = [playlen]
+
+    //API call
+    //should we add tempo?
+     spotifyApi.getRecommendations({
+      limit: playlen,
+      seed_artists: artistSeeds,
+      max_popularity: 50,
+      target_acousticness: this.state.topFeatures.acousticness,
+      target_danceability: this.state.topFeatures.danceability,
+      target_energy: this.state.topFeatures.energy,
+      target_instrumentalness: this.state.topFeatures.instrumentalness,
+      target_speechiness: this.state.topFeatures.speechiness,
+      target_valence: this.state.topFeatures.valence
+    })
+    .then ((data) => {
+      var tracks = data.tracks;
+      for (var i = 0; i < playlen; i++) {
+        songURIs[i] = tracks[i].uri;
+      }
+      this.setState({
+        recURIs: songURIs
+      })
+    })
+    console.log(songURIs)
+  }
+
+  //Populates Rec Playlist
+  populateRecPlaylist() {
+    //GET RECS
+    //Use top 5 artists as seeds
+    var len = 5;
+    var artistSeeds = [len];
+    for (var i = 0; i < len; i++) {
+      artistSeeds[i] = this.state.topArtists[i].id
+    }
+
+    var playlen = 30;
+    var songURIs = [playlen]
+
+    //API call
+    //should we add tempo?
+     spotifyApi.getRecommendations({
+      limit: playlen,
+      seed_artists: artistSeeds,
+      max_popularity: 50,
+      target_acousticness: this.state.topFeatures.acousticness,
+      target_danceability: this.state.topFeatures.danceability,
+      target_energy: this.state.topFeatures.energy,
+      target_instrumentalness: this.state.topFeatures.instrumentalness,
+      target_speechiness: this.state.topFeatures.speechiness,
+      target_valence: this.state.topFeatures.valence
+    })
+    .then ((data) => {
+      var tracks = data.tracks;
+      for (var i = 0; i < playlen; i++) {
+        songURIs[i] = tracks[i].uri;
+      }
+    });
+    console.log(songURIs)
+    //actually populate playlist
+    $.ajax({
+      url: "https://api.spotify.com/v1/playlists/"+this.state.dscvrid+"/tracks",
+      type: "POST",
+      data: JSON.stringify({"uris": songURIs}),
+      beforeSend: xhr => {
+        xhr.setRequestHeader("Authorization", "Bearer " + this.state.token);
+      }
+    });
+  }
+
+  //Create Rec Playlist
+  createRecPlaylist() {
+    var today = new Date();
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"];
+    var date = monthNames[today.getMonth()] + " " + today.getFullYear();
+    $.ajax({
+      url: "https://api.spotify.com/v1/users/"+this.state.userid+"/playlists",
+      type: "POST",
+      data: JSON.stringify({name: "Your " + date + " Recommendations"}, {description: "Created with DSCVR."}),
+      beforeSend: xhr => {
+        xhr.setRequestHeader("Authorization", "Bearer " + this.state.token);
+      },
+      success: play => {
+        this.setState({
+          dscvr: play.external_urls.spotify,
+          dscvrid: play.id,
+          createdRec: true
+        });
+        this.populateRecPlaylist();
       }
     });
   }
@@ -178,6 +344,20 @@ class App extends Component {
       )
     }
 
+    //Rec Button Logic
+    let recbutton =
+      (<div className= "recPlaylist">
+          <button onClick={() => this.createRecPlaylist()} type="button" className="btn btn-dark"> Get recommendations based on data!</button>
+      </div>);
+
+    if (this.state.createdFRec) {
+      recbutton = (
+        <div className= "recPlaylistLink">
+          <a target="_blank" style={linkStyle} href={this.state.dscvrurl}> Check it out here! </a>
+        </div>
+      )
+    }
+
     //Main App
     return (
       <div className="App">
@@ -196,6 +376,8 @@ class App extends Component {
             {favbutton}
             <TopArtists artists={this.state.topArtists.slice(0, 30)}/>
             <TopGenres genres={this.state.topGenres}/>
+            <TopFeatures features={this.state.topFeatures}/>
+            {recbutton}
           </div>
         )}
       </div>
