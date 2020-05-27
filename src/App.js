@@ -237,68 +237,69 @@ class App extends Component {
 
   //Populates Rec Playlist
   populateRecPlaylist() {
-    //GET RECS
-    //Use top 5 artists as seeds
-    var len = 5;
-    var artistSeeds = [len];
-    for (var i = 0; i < len; i++) {
-      artistSeeds[i] = this.state.topArtists[i].id
-    }
-
-    var playlen = 30;
-    var songURIs = [playlen]
-
-    //API call
-    //should we add tempo?
-     spotifyApi.getRecommendations({
-      limit: playlen,
-      seed_artists: artistSeeds,
-      max_popularity: 50,
-      target_acousticness: this.state.topFeatures.acousticness,
-      target_danceability: this.state.topFeatures.danceability,
-      target_energy: this.state.topFeatures.energy,
-      target_instrumentalness: this.state.topFeatures.instrumentalness,
-      target_speechiness: this.state.topFeatures.speechiness,
-      target_valence: this.state.topFeatures.valence
-    })
-    .then ((data) => {
-      var tracks = data.tracks;
-      for (var i = 0; i < playlen; i++) {
-        songURIs[i] = tracks[i].uri;
-      }
-    });
-    console.log(songURIs)
-    //actually populate playlist
+    console.log(this.state.recURIs)
+    //ADD SONGS TO REC Playlist
     $.ajax({
       url: "https://api.spotify.com/v1/playlists/"+this.state.dscvrid+"/tracks",
       type: "POST",
-      data: JSON.stringify({"uris": songURIs}),
+      data: JSON.stringify({"uris": this.state.recURIs}),
       beforeSend: xhr => {
         xhr.setRequestHeader("Authorization", "Bearer " + this.state.token);
       }
     });
   }
 
+  //Get Recommendations
+  getRecs() {
+    //Use top 5 artists as seeds
+    var len = 5;
+    var artistSeeds = [len];
+    for (var i = 0; i < len; i++) {
+      artistSeeds[i] = this.state.topArtists[i].id
+    };
+
+    var songURIs = [];
+    //Grab Recommendations
+     spotifyApi.getRecommendations({
+      limit: 30,
+      seed_artists: artistSeeds,
+      min_popularity: 10,
+      max_popularity: 50,
+      target_acousticness: this.state.topFeatures.acousticness,
+      target_danceability: this.state.topFeatures.danceability,
+      target_energy: this.state.topFeatures.energy,
+      target_instrumentalness: this.state.topFeatures.instrumentalness,
+      target_speechiness: this.state.topFeatures.speechiness,
+      target_valence: this.state.topFeatures.valence,
+    })
+    .then ((data) => {
+      var tracks = data.tracks;
+      for (var i = 0; i < tracks.length; i++) {
+        songURIs.push(tracks[i].uri);
+      }
+      this.setState({
+        recURIs: songURIs
+      });
+      this.populateRecPlaylist();
+    });
+  }
+
   //Create Rec Playlist
   createRecPlaylist() {
-    var today = new Date();
-    const monthNames = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"];
-    var date = monthNames[today.getMonth()] + " " + today.getFullYear();
     $.ajax({
       url: "https://api.spotify.com/v1/users/"+this.state.userid+"/playlists",
       type: "POST",
-      data: JSON.stringify({name: "Your " + date + " Recommendations"}, {description: "Created with DSCVR."}),
+      data: JSON.stringify({name: "you might like these BY DSCVR"}, {description: "Created with DSCVR."}),
       beforeSend: xhr => {
         xhr.setRequestHeader("Authorization", "Bearer " + this.state.token);
       },
       success: play => {
         this.setState({
-          dscvr: play.external_urls.spotify,
+          dscvrurl: play.external_urls.spotify,
           dscvrid: play.id,
           createdRec: true
         });
-        this.populateRecPlaylist();
+        this.getRecs();
       }
     });
   }
@@ -350,7 +351,7 @@ class App extends Component {
           <button onClick={() => this.createRecPlaylist()} type="button" className="btn btn-dark"> Get recommendations based on data!</button>
       </div>);
 
-    if (this.state.createdFRec) {
+    if (this.state.createdRec) {
       recbutton = (
         <div className= "recPlaylistLink">
           <a target="_blank" style={linkStyle} href={this.state.dscvrurl}> Check it out here! </a>
