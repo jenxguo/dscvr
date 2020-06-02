@@ -15,11 +15,49 @@ const spotifyApi = new SpotifyWebApi();
 
 AOS.init();
 
+function generateRandomString(length) {
+          var text = '';
+          var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+          for (var i = 0; i < length; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+          }
+          return text;
+        };
+
+export const authEndpoint = 'https://accounts.spotify.com/authorize';
+// Replace with your app's client ID, redirect URI and desired scopes
+const clientId = "ade8400ff2d0477cad2209f98f816ab9";
+const redirectUri = "http://localhost:3000/";
+const scopes = "user-read-private user-read-email user-top-read playlist-modify-public";
+const state = generateRandomString(16);
+
+var authurl = 'https://accounts.spotify.com/authorize';
+            authurl += '?response_type=token';
+            authurl += '&client_id=' + encodeURIComponent(clientId);
+            authurl += '&scope=' + encodeURIComponent(scopes);
+            authurl += '&redirect_uri=' + encodeURIComponent(redirectUri);
+            authurl += '&state=' + encodeURIComponent(state);
+
+
+// Get the hash of the url
+const hash = window.location.hash
+  .substring(1)
+  .split("&")
+  .reduce(function(initial, item) {
+    if (item) {
+      var parts = item.split("=");
+      initial[parts[0]] = decodeURIComponent(parts[1]);
+    }
+    return initial;
+  }, {});
+window.location.hash = "";
+
 class App extends Component {
   constructor(){
     super();
-    const params = this.getHashParams();
-    const token = params.access_token;
+  //  const params = this.getHashParams();
+    let token = hash.access_token;
     if (token) {
       spotifyApi.setAccessToken(token);
     }
@@ -362,7 +400,7 @@ class App extends Component {
           <div className="loginscreen">
             <div data-aos="fade-in" className="logincontent">
               <h1>DSCVR</h1><br></br>
-              <a style={linkStyle} href='http://localhost:8888'> Login to Spotify </a>
+              <a style={linkStyle} href={authurl}> Login to Spotify </a>
             </div>
           </div>
         )}
