@@ -1,0 +1,13 @@
+h1 {
+	display: inline;
+	position: relative;
+	font: 200px Helvetica, Sans-Serif;
+	letter-spacing: -5px;
+	color: rgba(73, 32, 94, 1);
+}
+
+h1:after {
+	content: "DSCVR";
+	position: absolute; left: 10px; top: 5px;
+	color: rgba(255, 255, 0, 0.7);
+}

@@ -1,0 +1,69 @@
+.top{
+  margin: auto
+}
+
+.card {
+  margin: 0 auto;
+  float: none;
+  margin-bottom: 10px;
+}
+
+.row {
+  max-width: 30cm;
+}
+
+.container{
+  text-align: left;
+}
+
+.imgs {
+  display:inline-block;
+  min-width:2.2cm;
+  height:3.8cm;
+  align: center;
+  vertical-align: middle;
+}
+
+.txts {
+  padding: 10px;
+  margin-bottom: 30px;
+  display:inline-block;
+  vertical-align: middle;
+  max-width: 6cm;
+}
+
+.listcontain {
+  margin-top: 2rem;
+  text-align: center
+}
+
+ol {
+   list-style: none;
+   counter-reset: item;
+ }
+
+ ol .litop {
+   display: flex;
+   counter-increment: item;
+   margin-bottom: 5px;
+ }
+
+ .litop:before {
+   margin-top: 2rem;
+   margin-right: 0.8rem;
+   content: counter(item);
+   background: #49205e;
+   border-radius: 50%;
+   color: white;
+   width: 2rem;
+   height: 2rem;
+   padding-top: 0.4rem;
+   text-align: center;
+   display: inline-block;
+   box-sizing: border-box;
+ }
+
+ img {
+   border: 3px solid yellow;
+   border-radius: 4px
+ }

@@ -28,7 +28,7 @@ const topGenres = (props) => {
   return(
     <div className="topGenres card" style={{width: "45em"}}>
       <div className="card-body">
-      <h2>Your favorite genres of the past month</h2>
+      <h2>Last Month's Top Genres</h2>
       <Pie
         data={{
           labels: labels,

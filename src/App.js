@@ -1,11 +1,12 @@
 import React, {Component} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { ParallaxProvider } from 'react-scroll-parallax';
 
-import TopSongs from './TopSongs/TopSongs'
-import TopArtists from './TopArtists/TopArtists'
+import Top from './Top/Top'
 import TopGenres from './TopGenres/TopGenres'
 import TopFeatures from './TopFeatures/TopFeatures'
+import Logo from './Logo/Logo'
 
 import * as $ from "jquery";
 import SpotifyWebApi from 'spotify-web-api-js';
@@ -29,13 +30,13 @@ class App extends Component {
       dataLoaded: false,
       topGenres: {},
       topFeatures: {
-        acousticness: null,
-        danceability: null,
-        energy: null,
-        instrumentalness: null,
-        speechiness: null,
-        valence: null,
-        tempo: null
+        Acousticness: {},
+        Danceability: {},
+        Energy: {},
+        Instrumentalness: {},
+        Speechiness: {},
+        Valence: {},
+        Tempo: {}
       },
       dataAnalyzed: false,
       favurl: "",
@@ -136,13 +137,41 @@ class App extends Component {
         }
         this.setState({
           topFeatures: {
-            acousticness: Math.round(this.average(acousticness)*100)/100,
-            danceability: Math.round(this.average(danceability)*100)/100,
-            energy: Math.round(this.average(energy)*100)/100,
-            instrumentalness: Math.round(this.average(instrumentalness)*1000)/1000,
-            speechiness: Math.round(this.average(speechiness)*100)/100,
-            valence: Math.round(this.average(valence)*100)/100,
-            tempo: Math.round(this.average(tempo))
+            Acousticness:
+              {
+                value: Math.round(this.average(acousticness)*100)/100,
+                desc: "Acousticness is a measure from 0.0 to 1.0 of how acoustic your tracks are, where 1.0 is most acoustic and 0.0 is least acoustic."
+              },
+            Danceability:
+            {
+              value: Math.round(this.average(danceability)*100)/100,
+              desc: "Danceability is a measure from 0.0 to 1.0 of how suitable your tracks are for dancing, where 1.0 is most danceable and 0.0 is least danceable."
+            },
+            Energy:
+            {
+              value: Math.round(this.average(energy)*100)/100,
+              desc: "Energy is a measure from 0.0 to 1.0 that represents how intense your tracks are, where 1.0 is most energetic and 0.0 is least energetic. An high energy track will feel fast, loud, noisy, and have more dynamic range and general entropy."
+            },
+            Instrumentalness:
+            {
+              value: Math.round(this.average(instrumentalness)*1000)/1000,
+              desc: "Instrumentalness is a measure from 0.0 to 1.0 that predicts whether a track has no vocals, where tracks closer to 1.0 in instrumentalness are more likely to have no vocals and tracks closer to 0.0 have a lot of vocals, such as rap."
+            },
+            Speechiness:
+            {
+              value: Math.round(this.average(speechiness)*100)/100,
+              desc: "Speechiness is a measure from 0.0 to 1.0 that detects the presence of spoken words in a track, where tracks with a speechiness closer to 1.0 are more likely to have exclusively spoken words and tracks closer to 0.0 represent music and non-spoken words."
+            },
+            Valence:
+            {
+              value: Math.round(this.average(valence)*100)/100,
+              desc: "Valence is a measure from 0.0 to 1.0 that represents how positive your tracks are, where 1.0 is more positive and happy sounds and 0.0 is more negative and sad or angry sounds."
+            },
+            Tempo:
+            {
+              value: Math.round(this.average(tempo)),
+              desc: "Tempo is the overall estimated tempo of a track in beats per minute (BPM)."
+            }
           }
         });
       });
@@ -198,43 +227,6 @@ class App extends Component {
     });
   }
 
-  //Gets recommended songs
-  getRecs() {
-    //Use top 5 artists as seeds
-    var len = 5;
-    var artistSeeds = [len];
-    for (var i = 0; i < len; i++) {
-      artistSeeds[i] = this.state.topArtists[i].id
-    }
-
-    var playlen = 30;
-    var songURIs = [playlen]
-
-    //API call
-    //should we add tempo?
-     spotifyApi.getRecommendations({
-      limit: playlen,
-      seed_artists: artistSeeds,
-      max_popularity: 50,
-      target_acousticness: this.state.topFeatures.acousticness,
-      target_danceability: this.state.topFeatures.danceability,
-      target_energy: this.state.topFeatures.energy,
-      target_instrumentalness: this.state.topFeatures.instrumentalness,
-      target_speechiness: this.state.topFeatures.speechiness,
-      target_valence: this.state.topFeatures.valence
-    })
-    .then ((data) => {
-      var tracks = data.tracks;
-      for (var i = 0; i < playlen; i++) {
-        songURIs[i] = tracks[i].uri;
-      }
-      this.setState({
-        recURIs: songURIs
-      })
-    })
-    console.log(songURIs)
-  }
-
   //Populates Rec Playlist
   populateRecPlaylist() {
     console.log(this.state.recURIs)
@@ -265,12 +257,12 @@ class App extends Component {
       seed_artists: artistSeeds,
       min_popularity: 10,
       max_popularity: 50,
-      target_acousticness: this.state.topFeatures.acousticness,
-      target_danceability: this.state.topFeatures.danceability,
-      target_energy: this.state.topFeatures.energy,
-      target_instrumentalness: this.state.topFeatures.instrumentalness,
-      target_speechiness: this.state.topFeatures.speechiness,
-      target_valence: this.state.topFeatures.valence,
+      target_acousticness: this.state.topFeatures.Acousticness,
+      target_danceability: this.state.topFeatures.Danceability,
+      target_energy: this.state.topFeatures.Energy,
+      target_instrumentalness: this.state.topFeatures.Instrumentalness,
+      target_speechiness: this.state.topFeatures.Speechiness,
+      target_valence: this.state.topFeatures.Valence,
     })
     .then ((data) => {
       var tracks = data.tracks;
@@ -324,6 +316,7 @@ class App extends Component {
 
     const linkStyle= {
       margin: "50em 0 0 0",
+      color: "#d9e254",
     };
 
     //Data Analysis Logic
@@ -334,13 +327,13 @@ class App extends Component {
     //Fav Playlist Logic
     let favbutton =
       (<div className= "favoritePlaylist">
-          <button onClick={() => this.createFavPlaylist()} type="button" className="btn btn-dark"> Make a playlist of your favorites!</button>
+          <button onClick={() => this.createFavPlaylist()} type="button" className="btn btn-lg btn-light"> Click to make a playlist of your favorites!</button>
       </div>);
 
     if (this.state.createdFav) {
       favbutton = (
         <div className= "favoritePlaylistLink">
-          <a target="_blank" style={linkStyle} href={this.state.favurl}> Check it out here! </a>
+          <a target="_blank" style={linkStyle} href={this.state.favurl}> Your playlist is here. </a>
         </div>
       )
     }
@@ -348,40 +341,58 @@ class App extends Component {
     //Rec Button Logic
     let recbutton =
       (<div className= "recPlaylist">
-          <button onClick={() => this.createRecPlaylist()} type="button" className="btn btn-dark"> Get recommendations based on data!</button>
+          <button onClick={() => this.createRecPlaylist()} type="button" className="btn btn-light btn-lg margin"> Click to get DSCVR's recommendations!</button>
       </div>);
 
     if (this.state.createdRec) {
       recbutton = (
         <div className= "recPlaylistLink">
-          <a target="_blank" style={linkStyle} href={this.state.dscvrurl}> Check it out here! </a>
+          <a target="_blank" style={linkStyle} href={this.state.dscvrurl}> Your playlist is here. </a>
         </div>
       )
     }
 
     //Main App
     return (
-      <div className="App">
+      <ParallaxProvider>
+      <div className="App bg">
         {!this.state.loggedIn && (
-          <div>
-            <h1>DSCVR</h1>
-            <a style={linkStyle} href='http://localhost:8888'> Login to Spotify </a>
+          <div className="loginscreen">
+            <div className="logincontent">
+              <h1>DSCVR</h1><br></br>
+              <a style={linkStyle} href='http://localhost:8888'> Login to Spotify </a>
+            </div>
           </div>
         )}
         {this.state.loggedIn && !this.state.dataLoaded && (
-          <button style={buttonStyle} onClick={() => this.getData()}>Get Ready to DSCVR</button>
+          <div className="firstscreen">
+            <button className="dscvrbutton btn btn-lg btn-light" type="button" onClick={() => this.getData()}>Get Ready to DSCVR</button>
+          </div>
         )}
         {this.state.loggedIn && this.state.dataLoaded && (
           <div>
-            <TopSongs songs={this.state.topSongs.slice(0, 30)}/>
-            {favbutton}
-            <TopArtists artists={this.state.topArtists.slice(0, 30)}/>
+            <Logo/>
+            <div className="title">
+              <span>1. Your Current Favorites</span>
+            </div>
+            <div className="top">
+                <Top songs={this.state.topSongs.slice(0, 10)} artists={this.state.topArtists.slice(0, 10)}/>
+            </div>
             <TopGenres genres={this.state.topGenres}/>
+            <div className="button">
+              {favbutton}
+            </div>
             <TopFeatures features={this.state.topFeatures}/>
-            {recbutton}
+            <span>3. DSCVR</span>
+            <p className="desc"> Find new music based on the average features of the music you already love.</p>
+            <div className="button">
+              {recbutton}
+            </div>
+            Created by Jennifer Guo. Project completed June 2020.
           </div>
         )}
       </div>
+      </ParallaxProvider>
     );
   }
 }

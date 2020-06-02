@@ -10,15 +10,19 @@ const topFeatures = (props) => {
   });
 
   return(
-    <div className="topFeatures card" style={{width: "45em"}}>
-      <div className="card-body">
-      <h2>Overall Features of Your Favorite Music</h2>
-      <ol>
+    <div className="topFeatures">
+      <span>2. Average Features of Your Music</span>
+      <p className="desc">Hover for more information!</p>
         {items.map((item) => (
-          <li><h6>Average {item[0]}: {item[1]}</h6></li>
+          <div className="card margin" style={{width: "20em"}}>
+            <div className="card-body" data-hover={item[1].desc}>
+              <div className="box_item" data-hover={item[1].desc}>
+                {item[0]} <br></br>
+                {item[1].value}
+              </div>
+            </div>
+          </div>
         ))}
-      </ol>
-      </div>
     </div>
   )
 }

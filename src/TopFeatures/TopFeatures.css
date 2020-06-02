@@ -1,3 +1,57 @@
 .topFeatures{
-  margin: 5em auto
+  margin: 5em auto;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 7em;
+}
+
+.margin{
+  margin-bottom: 30px;
+}
+
+.box_item{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 800;
+  padding: 20px;
+}
+
+.box_item:hover{
+  font-size: 0;
+}
+
+.box_item:hover:after{
+  content: attr(data-hover);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 200;
+  text-align: center;
+}
+
+.desc{
+  margin-top: 30px;
+  margin-bottom: 30px;
+  color: white;
+}
+
+@import url('https://fonts.googleapis.com/css?family=Montserrat:900i&display=swap');
+
+body{
+  background:yellow;
+	font-family: 'Montserrat', sans-serif;
+}
+
+span{
+  transform: translate(-50%, -50%);
+  font-size:50px;
+	letter-spacing:0.1em;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke-width: 3px;
+  -webkit-text-stroke-color: white;
+  text-shadow:
+						8px 8px #ff1f8f,
+						20px 20px #000000;
 }

@@ -1,3 +1,46 @@
 .App {
   text-align: center;
 }
+
+.bg {
+  background-color: #FF3CAC;
+  background-image: linear-gradient(225deg, #FF3CAC 0%, #784BA0 50%, #2B86C5 100%);
+}
+
+.button {
+  margin-top: 4em;
+  margin-bottom: 6em;
+}
+
+.btn-light {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.firstscreen {
+  width: 100%;
+  height: 100%;
+  position: absolute; top: 0; left: 0;
+  background-color: #FF3CAC;
+  background-image: linear-gradient(225deg, #FF3CAC 0%, #784BA0 50%, #2B86C5 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginscreen {
+  width: 100%;
+  height: 100%;
+  position: absolute; top: 0; left: 0;
+  background-color: #FF3CAC;
+  background-image: linear-gradient(225deg, #FF3CAC 0%, #784BA0 50%, #2B86C5 100%);
+  display: flex;
+}
+
+.logincontent {
+  margin: auto;
+}
+
+.title {
+  margin-top: 3em;
+  margin-bottom: 3em;
+}
