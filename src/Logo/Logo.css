@@ -11,3 +11,7 @@ h1:after {
 	position: absolute; left: 10px; top: 5px;
 	color: rgba(255, 255, 0, 0.7);
 }
+
+.desclogo {
+	color: white;
+}

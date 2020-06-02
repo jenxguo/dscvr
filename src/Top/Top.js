@@ -4,7 +4,6 @@ import "./Top.css";
 
 const top = (props) => {
   return(
-
     <div class="row top">
 
       <div class="col-sm-6">

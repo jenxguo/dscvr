@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { ParallaxProvider } from 'react-scroll-parallax';
 
 import Top from './Top/Top'
 import TopGenres from './TopGenres/TopGenres'
@@ -9,8 +8,12 @@ import TopFeatures from './TopFeatures/TopFeatures'
 import Logo from './Logo/Logo'
 
 import * as $ from "jquery";
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 import SpotifyWebApi from 'spotify-web-api-js';
 const spotifyApi = new SpotifyWebApi();
+
+AOS.init();
 
 class App extends Component {
   constructor(){
@@ -354,11 +357,10 @@ class App extends Component {
 
     //Main App
     return (
-      <ParallaxProvider>
       <div className="App bg">
         {!this.state.loggedIn && (
           <div className="loginscreen">
-            <div className="logincontent">
+            <div data-aos="fade-in" className="logincontent">
               <h1>DSCVR</h1><br></br>
               <a style={linkStyle} href='http://localhost:8888'> Login to Spotify </a>
             </div>
@@ -366,33 +368,36 @@ class App extends Component {
         )}
         {this.state.loggedIn && !this.state.dataLoaded && (
           <div className="firstscreen">
-            <button className="dscvrbutton btn btn-lg btn-light" type="button" onClick={() => this.getData()}>Get Ready to DSCVR</button>
+            <button data-aos="fade-in" className="dscvrbutton btn btn-lg btn-light" type="button" onClick={() => this.getData()}>Get Ready to DSCVR</button>
           </div>
         )}
         {this.state.loggedIn && this.state.dataLoaded && (
           <div>
             <Logo/>
-            <div className="title">
-              <span>1. Your Current Favorites</span>
-            </div>
-            <div className="top">
-                <Top songs={this.state.topSongs.slice(0, 10)} artists={this.state.topArtists.slice(0, 10)}/>
+            <div data-aos="fade-up">
+              <div className="title">
+                <span>1. Your Current Favorites</span>
+              </div>
+              <div className="top">
+                  <Top songs={this.state.topSongs.slice(0, 10)} artists={this.state.topArtists.slice(0, 10)}/>
+              </div>
             </div>
             <TopGenres genres={this.state.topGenres}/>
-            <div className="button">
+            <div data-aos="fade-left" className="button">
               {favbutton}
             </div>
             <TopFeatures features={this.state.topFeatures}/>
-            <span>3. DSCVR</span>
-            <p className="desc"> Find new music based on the average features of the music you already love.</p>
-            <div className="button">
+            <div data-aos="fade-up">
+              <span>3. DSCVR</span>
+              <p className="desc"> Find new music based on the average features of the music you already love.</p>
+            </div>
+            <div data-aos="fade-right" className="button">
               {recbutton}
             </div>
             Created by Jennifer Guo. Project completed June 2020.
           </div>
         )}
       </div>
-      </ParallaxProvider>
     );
   }
 }

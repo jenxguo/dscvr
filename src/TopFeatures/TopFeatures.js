@@ -1,5 +1,6 @@
 import React from 'react';
 import "./TopFeatures.css";
+import { Parallax } from 'react-scroll-parallax';
 
 const topFeatures = (props) => {
 
@@ -11,10 +12,12 @@ const topFeatures = (props) => {
 
   return(
     <div className="topFeatures">
+      <div data-aos="fade-up">
       <span>2. Average Features of Your Music</span>
       <p className="desc">Hover for more information!</p>
+      </div>
         {items.map((item) => (
-          <div className="card margin" style={{width: "20em"}}>
+          <div data-aos="fade-in" className="card margin" style={{width: "20em"}}>
             <div className="card-body" data-hover={item[1].desc}>
               <div className="box_item" data-hover={item[1].desc}>
                 {item[0]} <br></br>
