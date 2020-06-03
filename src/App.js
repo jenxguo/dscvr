@@ -28,7 +28,7 @@ function generateRandomString(length) {
 export const authEndpoint = 'https://accounts.spotify.com/authorize';
 // Replace with your app's client ID, redirect URI and desired scopes
 const clientId = "ade8400ff2d0477cad2209f98f816ab9";
-const redirectUri = "http://localhost:3000/";
+const redirectUri = "https://dscvrvibez.web.app/";
 const scopes = "user-read-private user-read-email user-top-read playlist-modify-public";
 const state = generateRandomString(16);
 
@@ -270,7 +270,6 @@ class App extends Component {
 
   //Populates Rec Playlist
   populateRecPlaylist() {
-    console.log(this.state.recURIs)
     //ADD SONGS TO REC Playlist
     $.ajax({
       url: "https://api.spotify.com/v1/playlists/"+this.state.dscvrid+"/tracks",
@@ -290,7 +289,6 @@ class App extends Component {
     for (var i = 0; i < len; i++) {
       artistSeeds[i] = this.state.topArtists[i].id
     };
-
     var songURIs = [];
     //Grab Recommendations
      spotifyApi.getRecommendations({
@@ -298,12 +296,12 @@ class App extends Component {
       seed_artists: artistSeeds,
       min_popularity: 10,
       max_popularity: 50,
-      target_acousticness: this.state.topFeatures.Acousticness,
-      target_danceability: this.state.topFeatures.Danceability,
-      target_energy: this.state.topFeatures.Energy,
-      target_instrumentalness: this.state.topFeatures.Instrumentalness,
-      target_speechiness: this.state.topFeatures.Speechiness,
-      target_valence: this.state.topFeatures.Valence,
+      target_acousticness: this.state.topFeatures.Acousticness.value,
+      target_danceability: this.state.topFeatures.Danceability.value,
+      target_energy: this.state.topFeatures.Energy.value,
+      target_instrumentalness: this.state.topFeatures.Instrumentalness.value,
+      target_speechiness: this.state.topFeatures.Speechiness.value,
+      target_valence: this.state.topFeatures.Valence.value,
     })
     .then ((data) => {
       var tracks = data.tracks;
