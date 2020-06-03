@@ -337,22 +337,6 @@ class App extends Component {
 
   render(){
     //Styles
-    const buttonStyle= {
-      fontsize: "20px",
-      display: "inline-block",
-      padding: "0.35em 1.2em",
-      border: "0.2em solid gray",
-      textalign: "center",
-      margin: "20em 0 0 0",
-      borderradius: "0.12em",
-      boxsizing: "border-box",
-      textdecoration: "none",
-      fontfamily:'Roboto, sans-serif',
-      fontweight:'300',
-      textalign: 'center',
-      cursor: "pointer"
-    };
-
     const linkStyle= {
       margin: "50em 0 0 0",
       color: "#d9e254",
@@ -372,7 +356,7 @@ class App extends Component {
     if (this.state.createdFav) {
       favbutton = (
         <div className= "favoritePlaylistLink">
-          <a target="_blank" style={linkStyle} href={this.state.favurl}> Your playlist is here. </a>
+          <a target="_blank" rel="noopener noreferrer" style={linkStyle} href={this.state.favurl}> Your playlist is here. </a>
         </div>
       )
     }
@@ -386,7 +370,7 @@ class App extends Component {
     if (this.state.createdRec) {
       recbutton = (
         <div className= "recPlaylistLink">
-          <a target="_blank" style={linkStyle} href={this.state.dscvrurl}> Your playlist is here. </a>
+          <a target="_blank" rel="noopener noreferrer" style={linkStyle} href={this.state.dscvrurl}> Your playlist is here. </a>
         </div>
       )
     }

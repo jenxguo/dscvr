@@ -1,6 +1,5 @@
 import React from 'react';
 import "./TopFeatures.css";
-import { Parallax } from 'react-scroll-parallax';
 
 const topFeatures = (props) => {
 
