@@ -12,7 +12,7 @@
     "react": "^16.13.1",
     "react-chartjs-2": "^2.9.0",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1",
+    "react-scripts": "5.0.1",
     "react-scroll-parallax": "^2.3.2",
     "react-spinners": "^0.8.3",
     "spotify-web-api-js": "^1.4.0"
